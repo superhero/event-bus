@@ -1,0 +1,26 @@
+{
+  "name": "event-bus",
+  "description": "Event Bus & Event Sourcing system",
+  "license": "UNLICENSED",
+  "scripts": {
+    "generate-doc": "npm test && npm run-script generate-doc-coverage && npm run-script generate-doc-tests && npm run-script generate-doc-jsdoc",
+    "generate-doc-coverage": "nyc report --reporter=html --report-dir=./doc/coverage",
+    "generate-doc-tests": "mocha './src/**/*.test.js' --reporter mochawesome --reporter-options reportDir=doc/tests,reportFilename=index,showHooks=always",
+    "generate-doc-jsdoc": "jsdoc src -c './jsdoc.json'",
+    "test": "syntax-check && nyc mocha './src/**/*.test.js'",
+    "start": "node src/index.js"
+  },
+  "dependencies": {
+    "@superhero/socket": "0.4.6",
+    "@superhero/debug": "1.1.11"
+  },
+  "devDependencies": {
+    "@superhero/syntax-check": "0.0.1",
+    "mocha": "5.1.0",
+    "mochawesome": "3.0.2",
+    "chai": "4.1.2",
+    "nyc": "11.7.1",
+    "jsdoc": "3.5.5",
+    "tui-jsdoc-template": "1.2.2"
+  }
+}
