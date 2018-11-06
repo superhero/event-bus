@@ -1,24 +1,21 @@
-const Observer = require('.')
-
-/**
- * Subscribes an observer to an event
- */
-class SubscribeObserver extends Observer
+class Subscribe
 {
-  get errorMessage()
+  dispatch(session, event)
   {
-    return 'you must pass the event you like to subscribe to as a string'
-  }
+    // if a subscription already exists for the given event for the given
+    // session then remove it.
+    // The session can only hold one subscription to an event. If multiple
+    // subscriptions to the same event would exist, then it would be impossible
+    // to unsubscribe to an event at a later state.
+    // If the subscription exists, then replace it with this new form to make
+    // it possible to change from "subscribe only once" to "subscribe to all"
+    if(event in session.observers)
+      session.socket.removeListener(event, session.observers[event])
 
-  valid(event)
-  {
-    if(this.session.hasObserverForEvent())
-      return
-
-    const observer = (_, dto) => this.session.context.emit(event, dto)
-    this.session.setObserverByEvent(event, observer)
-    this.session.server.on(event, observer)
+    const observer = (_, data) => session.context.emit(event, data)
+    session.observers[event] = observer
+    session.socket.on(event, observer)
   }
 }
 
-module.exports = SubscribeObserver
+module.exports = Subscribe

@@ -1,20 +1,11 @@
-const Observer = require('.')
-
-/**
- * Removes a subscription from an observer
- */
-class UnsubscribeObserver extends Observer
+class Unsubscribe
 {
-  get errorMessage()
+  dispatch(session, event)
   {
-    return 'you must pass the event you like to unsubscribe to as a string'
-  }
-
-  valid(event)
-  {
-    const observer = this.session.fetchObserverByEvent(event)
-    observer && this.session.server.removeListener(event, observer)
+    const observer = session.observers[event]
+    observer && session.socket.removeListener(event, observer)
+    delete session.observers[event]
   }
 }
 
-module.exports = UnsubscribeObserver
+module.exports = Unsubscribe
