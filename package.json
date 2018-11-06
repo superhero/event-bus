@@ -7,7 +7,7 @@
     "generate-doc-coverage": "nyc report --reporter=html --report-dir=./doc/coverage",
     "generate-doc-tests": "mocha './src/**/*.test.js' --reporter mochawesome --reporter-options reportDir=doc/tests,reportFilename=index,showHooks=always",
     "generate-doc-jsdoc": "jsdoc src -c './jsdoc.json'",
-    "test": "syntax-check && nyc mocha './src/**/*.test.js'",
+    "test": "syntax-check && nyc mocha --use_strict './src/**/*.test.js'",
     "start": "node src/index.js"
   },
   "dependencies": {
