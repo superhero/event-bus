@@ -5,16 +5,8 @@ ObserverFactory = require('./observer/factory'),
 sessionLocator  = new SessionLocator,
 serverFactory   = new ServerFactory(sessionLocator),
 observerFactory = new ObserverFactory,
-server          = serverFactory.create(),
-observers       =
-{
-  subscribe     : observerFactory.createSubscribeObserver(),
-  subscribeOnce : observerFactory.createSubscribeOnceObserver(),
-  unsubscribe   : observerFactory.createUnsubscribeObserver()
-}
+server          = serverFactory.create()
 
-server.attachObserver('subscribe',      observers.subscribe)
-server.attachObserver('subscribe-once', observers.subscribeOnce)
-server.attachObserver('unsubscribe',    observers.unsubscribe)
+server.attachObserver('contract', observerFactory.createContractObserver())
 
 server.listen(process.env.SOCKET_PORT)

@@ -1,18 +1,23 @@
 const
-SubscribeObserver     = require('./subscribe'),
-SubscribeOnceObserver = require('./subscribe-once'),
-UnsubscribeObserver   = require('./unsubscribe')
+ContractObserver    = require('./contract'),
+SubscribeObserver   = require('./subscribe'),
+UnsubscribeObserver = require('./unsubscribe')
 
 class ObserverFactory
 {
+  constructor(contractFactory)
+  {
+    this.contractFactory = contractFactory
+  }
+
+  createContractObserver()
+  {
+    return new ContractObserver(this.contractFactory)
+  }
+
   createSubscribeObserver()
   {
     return new SubscribeObserver
-  }
-
-  createSubscribeOnceObserver()
-  {
-    return new SubscribeOnceObserver
   }
 
   createUnsubscribeObserver()

@@ -3,6 +3,8 @@ FROM node:10.5-jessie
 ENV DEBIAN_FRONTEND noninteractive
 ENV SOCKET_PORT 18200
 
+EXPOSE 18200
+
 COPY package.json /opt/event-bus/package.json
 COPY src          /opt/event-bus/src
 

@@ -1,30 +1,33 @@
 class Server
 {
-  constructor(socketServer, sessionLocator)
+  /**
+   * @param {@superhero/socket/server} socket
+   * @param {SessionLocator} sessionLocator
+   */
+  constructor(socket, sessionLocator)
   {
-    this.socket         = socketServer
+    this.socket         = socket
     this.sessionLocator = sessionLocator
   }
 
+  /**
+   * @param {number} port
+   */
   listen(port)
   {
     this.socket.listen(port)
   }
 
+  /**
+   * @param {string} event
+   * @param {Observer} observer
+   */
   attachObserver(event, observer)
   {
     this.socket.on(event, (context, data) =>
     {
-      if(typeof data !== 'string')
-      {
-        const session = this.sessionLocator.load(this.socket, context)
-        observer.dispatch(session, data)
-      }
-      else
-      {
-        const message = 'you must pass the data as an event in form of a string'
-        context.emit(`${event}.error`, message)
-      }
+      const session = this.sessionLocator.load(this.socket, context)
+      observer.dispatch(session, data)
     })
   }
 }

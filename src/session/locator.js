@@ -9,6 +9,10 @@ class SessionLocator
     this.contextAutoIncrementedIndex = 0
   }
 
+  /**
+   * @param {@superhero/socket/server} socket
+   * @param {@superhero/socket/context} context
+   */
   load(socket, context)
   {
     this.loadSocketId(socket)
@@ -20,26 +24,30 @@ class SessionLocator
 
   /**
    * @protected
+   * @param {net.Socket} socket
    */
   loadSocketId(socket)
   {
     return socket.id
     ? socket.id
-    : socket.id = this.socketAutoIncrementedIndex++
+    : socket.id = ++this.socketAutoIncrementedIndex
   }
 
   /**
    * @protected
+   * @param {@superhero/socket/context} context
    */
   loadContextId(context)
   {
-    return context.id
-    ? context.id
-    : context.id = this.contextAutoIncrementedIndex++
+    return context.socket.id
+    ? context.socket.id
+    : context.socket.id = ++this.contextAutoIncrementedIndex
   }
 
   /**
    * @protected
+   * @param {@superhero/socket/server} socket
+   * @param {@superhero/socket/context} context
    */
   loadSession(socket, context)
   {

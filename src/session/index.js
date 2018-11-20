@@ -1,5 +1,9 @@
 class Session
 {
+  /**
+   * @param {@superhero/socket/server} socket
+   * @param {@superhero/socket/context} context
+   */
   constructor(socket, context)
   {
     this.observers  = {}

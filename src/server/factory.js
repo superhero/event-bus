@@ -5,6 +5,9 @@ Debug   = require('@superhero/debug')
 
 class ServerFactory
 {
+  /**
+   * @param {SessionLocator} sessionLocator
+   */
   constructor(sessionLocator)
   {
     this.sessionLocator = sessionLocator
