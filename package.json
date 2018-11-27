@@ -12,7 +12,8 @@
   },
   "dependencies": {
     "@superhero/socket": "0.5.0",
-    "@superhero/debug": "1.1.11"
+    "@superhero/debug": "1.1.11",
+    "redis": "2.8.0"
   },
   "devDependencies": {
     "@superhero/syntax-check": "0.0.1",
