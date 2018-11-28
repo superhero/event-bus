@@ -6,7 +6,7 @@ class AvailibilityResponseSubscriber
     this.messageFactory = messageFactory
   }
 
-  async subscriber(contract, message)
+  async subscribe(contract, message)
   {
     // already confirmed? then there's no need to do anything...
     if(this.isContractConfirmed(contract))
