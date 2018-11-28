@@ -1,9 +1,12 @@
 class ProgressSubscriber
 {
-  constructor(redisClient, messageFactory)
+  constructor(redisClient, messageFactory, completedPublisher,
+              progressTransmitterPublisher)
   {
-    this.redis          = redisClient
-    this.messageFactory = messageFactory
+    this.redis                        = redisClient
+    this.messageFactory               = messageFactory
+    this.completedPublisher           = completedPublisher
+    this.progressTransmitterPublisher = progressTransmitterPublisher
   }
 
   /**
@@ -12,14 +15,15 @@ class ProgressSubscriber
   {
     this.forwardProgressMessageToOrigin(originContext, contract, message)
     const progress = this.messageFactory.createProgressFromSerialized(message)
-    this.forwardProgressMessageToDependentAvailibilityResponse(contract, progress, message)
+    // forward progress message to dependent availibility response
+    this.progressTransmitterPublisher.publish(contract, progress, message)
 
     if(progress.final)
     {
-      this.setContractCommitmentAsCompleted(contract)
+      this.setContractCommitmentAsCompleted(contract, progress.commitment)
 
       if(this.isAllCommitmentsCompleted(contract))
-        await this.publishCompleted(contract)
+        await this.completedPublisher.publish(contract)
     }
   }
 
@@ -34,51 +38,12 @@ class ProgressSubscriber
   /**
    * @protected
    */
-  forwardProgressMessageToDependentAvailibilityResponse(contract, progress, message)
-  {
-    for(const availibilityResponses of contract.commitments)
-    {
-      // only the first availibility response is of any interest
-      const availibilityResponse = availibilityResponses[0]
-
-      for(const dependency of availibilityResponse.dependencyEvents)
-      {
-        if(dependency === progress.commitment)
-        {
-          const
-          executionId = availibilityResponse.executionId,
-          channel     = `${contract.id}.progress.${executionId}`
-
-          await this.redis.do('PUBLISH', channel, message)
-        }
-      }
-    }
-  }
-
-  /**
-   * @protected
-   */
-  setContractCommitmentAsCompleted(contract)
+  setContractCommitmentAsCompleted(contract, commitment)
   {
     if(!contract.completedCommitments)
       contract.completedCommitments = {}
 
-    contract.completedCommitments[progress.commitment] = true
-  }
-
-  /**
-   * @protected
-   */
-  async publishCompleted(contract)
-  {
-    const
-    completed           = this.messageFactory.createCompleted(contract.id),
-    completedChannel    = `${contract.id}.completed`,
-    serializedCompleted = completed.serialize()
-
-    await this.redis.do('PUBLISH', completedChannel, serializedCompleted)
-
-    contract.completed = true
+    contract.completedCommitments[commitment] = true
   }
 
   /**
@@ -86,7 +51,8 @@ class ProgressSubscriber
    */
   isAllCommitmentsCompleted(contract)
   {
-    contract.commitments.each((key) => contract.completedCommitments[key])
+    const commitments = Object.keys(contract.commitments)
+    return commitments.each((key) => contract.completedCommitments[key])
   }
 }
 

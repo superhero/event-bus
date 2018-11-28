@@ -28,6 +28,7 @@ class MessageFactory
    * @param {string} name
    * @param {*} input
    * @param {Object} commitments
+   *
    * @returns {MessageContract}
    */
   createContract(id, name, input, commitments)
@@ -51,6 +52,7 @@ class MessageFactory
 
   /**
    * @param {string} id
+   *
    * @returns {MessageConfirmation}
    */
   createConfirmation(id)
@@ -70,6 +72,7 @@ class MessageFactory
 
   /**
    * @param {string} id
+   *
    * @returns {MessageCompleted}
    */
   createCompleted(id)

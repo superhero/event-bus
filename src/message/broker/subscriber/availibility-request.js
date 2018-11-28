@@ -1,10 +1,11 @@
 class AvailibilityRequestSubscriber
 {
-  constructor(redisClient, messageFactory, events)
+  constructor(redisClient, messageFactory, events, availibilityResponsePublisher)
   {
-    this.redis          = redisClient
-    this.messageFactory = messageFactory
-    this.events         = events
+    this.redis                          = redisClient
+    this.messageFactory                 = messageFactory
+    this.events                         = events
+    this.availibilityResponsePublisher  = availibilityResponsePublisher
   }
 
   /**
@@ -31,19 +32,17 @@ class AvailibilityRequestSubscriber
   /**
    * @protected
    */
-  onAvailibilityRequest(commitment, dependencies, executionObserver, progressObserver, message)
+  async onAvailibilityRequest(commitment, dependencies, executionObserver, progressObserver, message)
   {
     const
-    availibilityRequest             = this.messageFactory.createAvailibilityRequestFromSerialized(message),
-    contractId                      = availibilityRequest.contractId,
-    executionId                     = this.createExecutionId(),
-    serializedAvailibilityResponse  = this.messageFactory.createAvailibilityResponse(contractId, executionId, commitment, dependencies),
-    availibilityResponseChannel     = `${contractId}.availibility-response`,
-    executionChannel                = `${contractId}.execution.${commitment}.${executionId}`,
-    progressChannel                 = `${contractId}.progress.${executionId}`,
-    completedChannel                = `${contractId}.completed`
+    availibilityRequest = this.messageFactory.createAvailibilityRequestFromSerialized(message),
+    contractId          = availibilityRequest.contractId,
+    executionId         = this.createExecutionId(),
+    executionChannel    = `${contractId}.execution.${commitment}.${executionId}`,
+    progressChannel     = `${contractId}.progress.${executionId}`,
+    completedChannel    = `${contractId}.completed`
 
-    this.redis.do('PUBLISH', availibilityResponseChannel, serializedAvailibilityResponse)
+    await this.availibilityResponsePublisher.publish()
     this.redis.subscribe(executionChannel)
 
     this.forwardExecutionEventToObserver(executionChannel, executionObserver)
@@ -59,7 +58,7 @@ class AvailibilityRequestSubscriber
   {
     const
     timestamp = Date.now().toString(36),
-    random    = Math.random().toString(36).substr(2)
+    random    = Math.random().toString(36).substr(2),
     id        = `${timestamp}-${random}`
 
     return id

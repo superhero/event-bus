@@ -1,13 +1,12 @@
 class ProgressPublisher
 {
-  constructor(redisClient, messageFactory, events)
+  constructor(redisClient, messageFactory)
   {
     this.redis          = redisClient
     this.messageFactory = messageFactory
   }
 
   /**
-   * @public
    */
   async publish(contractId, output, commitment, final)
   {

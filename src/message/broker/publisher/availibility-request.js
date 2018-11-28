@@ -1,11 +1,13 @@
 class AvailibilityRequestPublisher
 {
-  constructor(messageFactory, redis)
+  constructor(redisClient, messageFactory)
   {
+    this.redis          = redisClient
     this.messageFactory = messageFactory
-    this.redis          = redis
   }
 
+  /**
+   */
   async publish(contractName, contractId, commitment)
   {
     const
