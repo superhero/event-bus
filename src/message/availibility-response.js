@@ -10,6 +10,8 @@ class MessageAvailibilityResponse extends Message
    */
   constructor(contractId, executionId, commitment, dependenyEvents)
   {
+    super()
+
     this.contractId       = contractId
     this.executionId      = executionId
     this.commitment       = commitment

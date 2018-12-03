@@ -1,3 +1,5 @@
+// this is not a subscriber, it's more of a handler or dispatcher
+
 class ContractSubscriber
 {
   constructor(redisClient, messageFactory, events, availibilityRequestPublisher,
@@ -25,7 +27,7 @@ class ContractSubscriber
     this.attachSubscriberForProgress(originContext, contract)
     this.attachSubscriberForConfirmation(originContext)
     this.attachSubscriberForCompleted(originContext)
-    this.publishAvailibilityRequestForContract(contract)
+    await this.publishAvailibilityRequestForContract(contract)
   }
 
   /**
@@ -91,7 +93,7 @@ class ContractSubscriber
   /**
    * @protected
    */
-  publishAvailibilityRequestForContract(contract)
+  async publishAvailibilityRequestForContract(contract)
   {
     const publisher = this.availibilityRequestPublisher
     for(const commitment in contract.commitments)

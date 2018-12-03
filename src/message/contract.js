@@ -10,6 +10,8 @@ class MessageContract extends Message
    */
   constructor(id, name, input, commitments)
   {
+    super()
+
     this.id           = id
     this.name         = name
     this.input        = input

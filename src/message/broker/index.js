@@ -20,13 +20,6 @@ class MessageBroker
 
   /**
    */
-  subscribeToContract(contract, originContext)
-  {
-    return this.contractSubscriber.subscribe(contract, originContext)
-  }
-
-  /**
-   */
   publishProgress(contractId, output, commitment, final)
   {
     return this.progressPublisher.publish(contractId, output, commitment, final)
@@ -40,6 +33,13 @@ class MessageBroker
     return this.availibilityRequestSubscriber.subscribe(
       contractName, commitment, dependencies, executionObserver,
       progressObserver)
+  }
+
+  /**
+   */
+  subscribeToContract(contract, originContext)
+  {
+    return this.contractSubscriber.subscribe(contract, originContext)
   }
 }
 

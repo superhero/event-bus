@@ -8,6 +8,8 @@ class MessageAvailibilityRequest extends Message
    */
   constructor(contractId, commitment)
   {
+    super()
+
     this.contractId = contractId
     this.commitment = commitment
 

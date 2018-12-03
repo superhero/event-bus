@@ -1,16 +1,14 @@
 const
-MessageDependencyEventsTypeError  = require('./error/dependency-events-type-error'),
-MessageDependencyEventsRangeError = require('./error/dependency-events-range-error'),
-MessageIdTypeError                = require('./error/id-type-error'),
-MessageIdRangeError               = require('./error/id-range-error'),
-MessageNameTypeError              = require('./error/name-type-error'),
-MessageNameRangeError             = require('./error/name-range-error'),
-MessageDependenciesTypeError      = require('./error/dependencies-type-error'),
-MessageCommitmentsTypeError       = require('./error/commitments-type-error'),
-MessageCommitmentsRangeError      = require('./error/commitments-range-error'),
-MessageCommitmentTypeError        = require('./error/commitment-type-error'),
-MessageCommitmentRangeError       = require('./error/commitment-range-error'),
-MessageFinalTypeError             = require('./error/final-type-error')
+MessageIdTypeError            = require('./error/id-type-error'),
+MessageIdRangeError           = require('./error/id-range-error'),
+MessageNameTypeError          = require('./error/name-type-error'),
+MessageNameRangeError         = require('./error/name-range-error'),
+MessageDependenciesTypeError  = require('./error/dependencies-type-error'),
+MessageCommitmentsTypeError   = require('./error/commitments-type-error'),
+MessageCommitmentsRangeError  = require('./error/commitments-range-error'),
+MessageCommitmentTypeError    = require('./error/commitment-type-error'),
+MessageCommitmentRangeError   = require('./error/commitment-range-error'),
+MessageFinalTypeError         = require('./error/final-type-error')
 
 class MessageValidator
 {
@@ -117,7 +115,7 @@ class MessageValidator
     if(typeof id !== 'string')
       throw new MessageIdTypeError('id must be a string')
 
-    if(id.length > 0)
+    if(id.length === 0)
       throw new MessageIdRangeError('id can not be empty')
   }
 
@@ -130,7 +128,7 @@ class MessageValidator
     if(typeof name !== 'string')
       throw new MessageNameTypeError('name must be a string')
 
-    if(name.length > 0)
+    if(name.length === 0)
       throw new MessageNameRangeError('name can not be empty')
   }
 
@@ -157,7 +155,7 @@ class MessageValidator
     if(commitments === null)
       throw new MessageCommitmentsTypeError('commitments must not be null')
 
-    if(Object.keys(commitments).length > 0)
+    if(Object.keys(commitments).length === 0)
       throw new MessageCommitmentsRangeError('commitments must contain at least 1 item')
 
     for(const commitment in commitments)
@@ -175,10 +173,10 @@ class MessageValidator
    */
   validateCommitment(commitment)
   {
-    if(typeof commitment === 'string')
-      throw new MessageCommitmentTypeError('commitments must be a string')
+    if(typeof commitment !== 'string')
+      throw new MessageCommitmentTypeError('commitment must be a string')
 
-    if(commitment.length > 0)
+    if(commitment.length === 0)
       throw new MessageCommitmentRangeError('commitment can not be empty')
   }
 
@@ -202,15 +200,6 @@ class MessageValidator
       throw new MessageDependenciesTypeError('dependencies must be an array')
 
     events.forEach(this.validateCommitment.bind(this))
-  }
-
-  validateDependencyEvents(dependencyEvents)
-  {
-    if(!Array.isArray(dependencyEvents))
-      throw new MessageDependencyEventsTypeError('dependency events must be an array')
-
-    for(const dependency of dependencyEvents)
-      this.validateCommitment(dependency)
   }
 
   /**

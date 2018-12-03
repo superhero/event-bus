@@ -1,12 +1,16 @@
+/*
 const
-socket                = require('@superhero/socket'),
-Debug                 = require('@superhero/debug'),
+host                  = '??? redis host ???',
+Events                = require('events'),
 MessageFactory        = require('./message/factory'),
 MessageBrokerFactory  = require('./message/broker/factory'),
-messageFactory        = new MessageFactory,
-messageBroker         = new MessageBrokerFactory(messageFactory),
-log                   = new Debug({ debug:true }),
-server                = socket.createServer(log)
+RedisFactory          = require('./redis/factory'),
+events                = new Events(),
+redisFactory          = new RedisFactory(),
+redisClient           = redisFactory.createRedisClient(events, host),
+messageFactory        = new MessageFactory(),
+messageBrokerFactory  = new MessageBrokerFactory(messageFactory, events, redisClient),
+messageBroker         = messageBrokerFactory.createMessageBroker()
 
-server.listen(process.env.SOCKET_PORT)
-server.on('contract', messageBroker.dispatchContract.bind(messageBroker))
+module.exports = messageBroker
+*/

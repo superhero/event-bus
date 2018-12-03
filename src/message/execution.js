@@ -9,6 +9,8 @@ class MessageExecution extends Message
    */
   constructor(contractId, input, commitment)
   {
+    super()
+
     this.contractId = contractId
     this.input      = input
     this.commitment = commitment

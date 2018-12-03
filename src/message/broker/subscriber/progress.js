@@ -11,7 +11,7 @@ class ProgressSubscriber
 
   /**
    */
-  subscribe(originContext, contract, message)
+  async subscribe(originContext, contract, message)
   {
     this.forwardProgressMessageToOrigin(originContext, contract, message)
     const progress = this.messageFactory.createProgressFromSerialized(message)

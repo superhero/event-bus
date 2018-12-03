@@ -1,6 +1,7 @@
 class AvailibilityResponseSubscriber
 {
-  constructor(redisClient, messageFactory, executionPublisher, confirmationPublisher)
+  constructor(redisClient, messageFactory, executionPublisher,
+              confirmationPublisher)
   {
     this.redis                  = redisClient
     this.messageFactory         = messageFactory
@@ -18,7 +19,7 @@ class AvailibilityResponseSubscriber
 
     // if we have not recieved responses for every commitment then we have not
     // fulfilled the contract
-    if(this.isContractNotAvailibleForExecution(contract))
+    if(!this.isContractAvailibleForExecution(contract))
       return
 
     await this.confirmationPublisher.publish(contract)
@@ -36,11 +37,13 @@ class AvailibilityResponseSubscriber
   /**
    * @protected
    */
-  isContractNotAvailibleForExecution(contract)
+  isContractAvailibleForExecution(contract)
   {
     for(const availibilityResponses of contract.commitments)
-      if(!availibilityResponses.length)
-        return true
+      if(availibilityResponses.length)
+        return false
+
+    return true
   }
 
   /**

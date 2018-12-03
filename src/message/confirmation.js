@@ -7,6 +7,8 @@ class MessageConfirmation extends Message
    */
   constructor(contractId)
   {
+    super()
+
     this.contractId = contractId
     Object.freeze(this)
   }

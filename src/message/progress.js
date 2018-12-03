@@ -10,6 +10,8 @@ class MessageProgress extends Message
    */
   constructor(contractId, output, commitment, final)
   {
+    super()
+
     this.contractId   = contractId
     this.output       = output
     this.commitment   = commitment
