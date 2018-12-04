@@ -1,21 +1,26 @@
 class CompletedPublisher
 {
-  constructor(redisClient, messageFactory)
+  /**
+   * @param {RedisPublisher} redisPublisher
+   * @param {MessageFactory} messageFactory
+   */
+  constructor(redisPublisher, messageFactory)
   {
-    this.redis          = redisClient
+    this.redisPublisher = redisPublisher
     this.messageFactory = messageFactory
   }
 
   /**
+   * @param {MessageContract} contract
    */
-  async publish(contract)
+  publish(contract)
   {
     const
     completed           = this.messageFactory.createCompleted(contract.id),
     completedChannel    = `${contract.id}.completed`,
     serializedCompleted = completed.serialize()
 
-    await this.redis.do('PUBLISH', completedChannel, serializedCompleted)
+    this.redisPublisher.publish(completedChannel, serializedCompleted)
 
     contract.completed = true
   }

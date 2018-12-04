@@ -9,7 +9,7 @@
     "generate-doc-jsdoc": "jsdoc src -c './jsdoc.json'",
     "test-full": "syntax-check && nyc mocha --use_strict './src/**/*.test.js'",
     "test": "mocha --use_strict './src/**/*.test.js'",
-    "start": "node src/index.js"
+    "main": "node src/index.js"
   },
   "dependencies": {
     "@superhero/socket": "0.5.0",

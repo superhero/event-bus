@@ -1,21 +1,29 @@
 class ProgressPublisher
 {
-  constructor(redisClient, messageFactory)
+  /**
+   * @param {RedisPublisher} redisPublisher
+   * @param {MessageFactory} messageFactory
+   */
+  constructor(redisPublisher, messageFactory)
   {
-    this.redis          = redisClient
+    this.redisPublisher = redisPublisher
     this.messageFactory = messageFactory
   }
 
   /**
+   * @param {string} contractId
+   * @param {*} output
+   * @param {string} commitment
+   * @param {boolean} final
    */
-  async publish(contractId, output, commitment, final)
+  publish(contractId, output, commitment, final)
   {
     const
     channel = `${contractId}.progress`,
     message = this.messageFactory.createProgress(contractId, output, commitment, final),
     serializedProgress = message.serialize()
 
-    await this.redis.do('PUBLISH', channel, serializedProgress)
+    this.redisPublisher.publish(channel, serializedProgress)
   }
 }
 

@@ -1,17 +1,23 @@
-class ProgressSubscriber
+class ProgressDispatcher
 {
-  constructor(redisClient, messageFactory, completedPublisher,
-              progressTransmitterPublisher)
+  /**
+   * @param {MessageFactory} messageFactory
+   * @param {CompletedPublisher} completedPublisher
+   * @param {ProgressTransmitterPublisher} progressTransmitterPublisher
+   */
+  constructor(messageFactory, completedPublisher, progressTransmitterPublisher)
   {
-    this.redis                        = redisClient
     this.messageFactory               = messageFactory
     this.completedPublisher           = completedPublisher
     this.progressTransmitterPublisher = progressTransmitterPublisher
   }
 
   /**
+   * @param {@superhero.Socket.Context} originContext
+   * @param {MessageContract} contract
+   * @param {string} message
    */
-  async subscribe(originContext, contract, message)
+  dispatch(originContext, contract, message)
   {
     this.forwardProgressMessageToOrigin(originContext, contract, message)
     const progress = this.messageFactory.createProgressFromSerialized(message)
@@ -23,7 +29,7 @@ class ProgressSubscriber
       this.setContractCommitmentAsCompleted(contract, progress.commitment)
 
       if(this.isAllCommitmentsCompleted(contract))
-        await this.completedPublisher.publish(contract)
+        this.completedPublisher.publish(contract)
     }
   }
 
@@ -51,9 +57,12 @@ class ProgressSubscriber
    */
   isAllCommitmentsCompleted(contract)
   {
-    const commitments = Object.keys(contract.commitments)
-    return commitments.each((key) => contract.completedCommitments[key])
+    const
+    commitments     = Object.keys(contract.commitments),
+    isAllCompleted  = commitments.every((key) => contract.completedCommitments[key])
+
+    return isAllCompleted
   }
 }
 
-module.exports = ProgressSubscriber
+module.exports = ProgressDispatcher

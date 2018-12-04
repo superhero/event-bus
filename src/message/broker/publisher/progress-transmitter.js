@@ -1,21 +1,28 @@
 class ProgressTransmitterPublisher
 {
-  constructor(redisClient)
+  /**
+   * @param {RedisPublisher} redisPublisher
+   */
+  constructor(redisPublisher)
   {
-    this.redis = redisClient
+    this.redisPublisher = redisPublisher
   }
 
   /**
-   * Transmitting the progress message to all dependent commitments in a contract
+   * Transmitting the progress message to all dependent commitments in a
+   * contract
+   * @param {MessageContract} contract
+   * @param {MessageProgress} progress
+   * @param {string} message serialized MessageProgress ready to be transmitted
    */
-  async publish(contract, progress, message)
+  publish(contract, progress, message)
   {
-    for(const availibilityResponses of contract.commitments)
+    for(const commitment in contract.commitments)
     {
       // only the first availibility response is of any interest
-      const availibilityResponse = availibilityResponses[0]
+      const availibilityResponse = contract.commitments[commitment][0]
 
-      for(const dependency of availibilityResponse.dependencyEvents)
+      for(const dependency of availibilityResponse.dependencies)
       {
         if(dependency === progress.commitment)
         {
@@ -23,7 +30,7 @@ class ProgressTransmitterPublisher
           executionId = availibilityResponse.executionId,
           channel     = `${contract.id}.progress.${executionId}`
 
-          await this.redis.do('PUBLISH', channel, message)
+          this.redisPublisher.publish(channel, message)
         }
       }
     }

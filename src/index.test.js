@@ -1,70 +1,38 @@
-describe('event-bus', async () =>
+describe('Event Bus', async () =>
 {
   const
   expect  = require('chai').expect,
   context = require('mochawesome/addContext')
 
-  it('dummy', () =>
-  {
-    expect(1).to.be.equal(1)
-  })
-
-  it(' :) ', async () =>
+  it('is possible to dispacth and complete a contract', (done) =>
   {
     const
-    host                  = 'localhost',
-    Events                = require('events'),
-    MessageFactory        = require('./message/factory'),
-    MessageBrokerFactory  = require('./message/broker/factory'),
-    RedisFactory          = require('./redis/factory'),
-    events                = new Events(),
-    redisFactory          = new RedisFactory(),
-    redisClient           = redisFactory.createRedisClient(events, host),
-    messageFactory        = new MessageFactory(),
-    messageBrokerFactory  = new MessageBrokerFactory(messageFactory, events, redisClient),
-    messageBroker         = messageBrokerFactory.createMessageBroker()
+    host                = 'localhost',
+    EventBusFactory     = require('.'),
+    eventBusFactory     = new EventBusFactory,
+    eventBus            = eventBusFactory.create(host),
+    contractName        = 'foobar',
+    input               = undefined,
+    output              = undefined,
+    commitmentA         = 'bar',
+    commitmentB         = 'baz',
+    commitments         = { [commitmentA]:[], [commitmentB]:[] },
+    dependencies        = [],
+    completed           = () =>
+    {
+      eventBus.redis.publisher.redisClient.quit()
+      eventBus.redis.subscriber.redisClient.quit()
+      done()
+    },
+    originContext       = { emit:(channel)    => channel.endsWith('completed') && completed() },
+    executionObserverA  = (messageExecution)  => eventBus.messageBroker.publishProgress(messageExecution.contractId, output, messageExecution.commitment, true),
+    executionObserverB  = (messageExecution)  => {},
+    progressObserverB   = (messageProgress)   => eventBus.messageBroker.publishProgress(messageProgress.contractId, output, commitmentB, true)
 
-    /*
-    const
-    name        = 'foobar',
-    input       = { foo:'bar' },
-    commitments = { bar:[] }
-    */
+    eventBus.messageBroker.subscribeToContracts(originContext)
+    eventBus.messageBroker.subscribeToAvailibilityRequest(contractName, commitmentA, dependencies,  executionObserverA)
+    eventBus.messageBroker.subscribeToAvailibilityRequest(contractName, commitmentB, [commitmentA], executionObserverB, progressObserverB)
 
-    await messageBroker.publishContract(name, input, commitments)
-
-    // redisClient.on('message', (channel, data) => { done(); console.log('***', channel, data) })
-    redisClient.do('PUBLISH', 'foochannel', 'foodata')
-    // expect(1).to.be.equal(1)
-
-    /*
-    var redis = require("redis")
-      , subscriber = redis.createClient()
-      , publisher  = redis.createClient()
-    */
-
-    subscriber.on("message", function(channel, message) {
-      console.log("Message '" + message + "' on channel '" + channel + "' arrived!")
-    });
-
-    subscriber.subscribe("test");
-
-    publisher.publish("test", "haaaaai");
-    publisher.publish("test", "kthxbai");
+    eventBus.messageBroker.publishContract(contractName, input, commitments)
   })
 })
-
-/*
-const
-socket                = require('@superhero/socket'),
-Debug                 = require('@superhero/debug'),
-MessageFactory        = require('./message/factory'),
-MessageBrokerFactory  = require('./message/broker/factory'),
-messageFactory        = new MessageFactory,
-messageBroker         = new MessageBrokerFactory(messageFactory),
-log                   = new Debug({ debug:true }),
-server                = socket.createServer(log)
-
-server.listen(process.env.SOCKET_PORT)
-server.on('contract', messageBroker.dispatchContract.bind(messageBroker))
-*/

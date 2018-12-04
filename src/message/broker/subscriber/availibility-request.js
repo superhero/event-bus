@@ -1,19 +1,30 @@
 class AvailibilityRequestSubscriber
 {
-  constructor(redisClient, messageFactory, events, availibilityResponsePublisher)
+  /**
+   * @param {RedisSubscriber} redisSubscriber
+   * @param {MessageFactory} messageFactory
+   * @param {Events} events
+   * @param {AvailibilityResponsePublisher} availibilityResponsePublisher
+   */
+  constructor(redisSubscriber, messageFactory, events, availibilityResponsePublisher)
   {
-    this.redis                          = redisClient
+    this.redisSubscriber                = redisSubscriber
     this.messageFactory                 = messageFactory
     this.events                         = events
     this.availibilityResponsePublisher  = availibilityResponsePublisher
   }
 
   /**
+   * @param {string} contractName
+   * @param {string} commitment
+   * @param {Array<string>} dependencies
+   * @param {function} executionObserver
+   * @param {function} progressObserver
    */
   subscribe(contractName, commitment, dependencies, executionObserver, progressObserver)
   {
     const availibilityRequestChannel = `${contractName}.availibility-request.${commitment}`
-    this.redis.subscribe(channel)
+    this.redisSubscriber.subscribe(availibilityRequestChannel)
     this.attachListenerForAvailibilityRequest(availibilityRequestChannel, commitment, dependencies, executionObserver, progressObserver)
   }
 
@@ -32,7 +43,7 @@ class AvailibilityRequestSubscriber
   /**
    * @protected
    */
-  async onAvailibilityRequest(commitment, dependencies, executionObserver, progressObserver, message)
+  onAvailibilityRequest(commitment, dependencies, executionObserver, progressObserver, message)
   {
     const
     availibilityRequest = this.messageFactory.createAvailibilityRequestFromSerialized(message),
@@ -42,8 +53,8 @@ class AvailibilityRequestSubscriber
     progressChannel     = `${contractId}.progress.${executionId}`,
     completedChannel    = `${contractId}.completed`
 
-    await this.availibilityResponsePublisher.publish()
-    this.redis.subscribe(executionChannel)
+    this.availibilityResponsePublisher.publish(contractId, executionId, commitment, dependencies)
+    this.redisSubscriber.subscribe(executionChannel)
 
     this.forwardExecutionEventToObserver(executionChannel, executionObserver)
     this.forwardProgressEventToObserver(progressChannel, progressObserver)

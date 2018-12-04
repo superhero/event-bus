@@ -1,15 +1,22 @@
-class AvailibilityResponseSubscriber
+class AvailibilityResponseDispatcher
 {
-  constructor(redisClient, messageFactory, executionPublisher,
-              confirmationPublisher)
+  /**
+   * @param {MessageFactory} messageFactory
+   * @param {ExecutionPublisher} executionPublisher
+   * @param {ConfirmationPublisher} confirmationPublisher
+   */
+  constructor(messageFactory, executionPublisher, confirmationPublisher)
   {
-    this.redis                  = redisClient
     this.messageFactory         = messageFactory
     this.executionPublisher     = executionPublisher
     this.confirmationPublisher  = confirmationPublisher
   }
 
-  async subscribe(contract, message)
+  /**
+   * @param {MessageContract} contract
+   * @param {string} message
+   */
+  dispatch(contract, message)
   {
     // already confirmed? then there's no need to do anything...
     if(this.isContractConfirmed(contract))
@@ -22,8 +29,8 @@ class AvailibilityResponseSubscriber
     if(!this.isContractAvailibleForExecution(contract))
       return
 
-    await this.confirmationPublisher.publish(contract)
-    await this.executionPublisher.publish(contract)
+    this.confirmationPublisher.publish(contract)
+    this.executionPublisher.publish(contract)
   }
 
   /**
@@ -39,8 +46,8 @@ class AvailibilityResponseSubscriber
    */
   isContractAvailibleForExecution(contract)
   {
-    for(const availibilityResponses of contract.commitments)
-      if(availibilityResponses.length)
+    for(const commitment in contract.commitments)
+      if(!contract.commitments[commitment].length)
         return false
 
     return true
@@ -56,4 +63,4 @@ class AvailibilityResponseSubscriber
   }
 }
 
-module.exports = AvailibilityResponseSubscriber
+module.exports = AvailibilityResponseDispatcher

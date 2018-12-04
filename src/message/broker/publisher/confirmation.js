@@ -1,21 +1,26 @@
 class ConfirmationPublisher
 {
-  constructor(redisClient, messageFactory)
+  /**
+   * @param {RedisPublisher} redisPublisher
+   * @param {MessageFactory} messageFactory
+   */
+  constructor(redisPublisher, messageFactory)
   {
-    this.redis          = redisClient
+    this.redisPublisher = redisPublisher
     this.messageFactory = messageFactory
   }
 
   /**
+   * @param {MessageContract} contract
    */
-  async publish(contract)
+  publish(contract)
   {
     const
     confirmation            = this.messageFactory.createConfirmation(contract.id),
     confirmationChannel     = `${contract.id}.confirmation`,
     serializedConfirmation  = confirmation.serialize()
 
-    await this.redis.do('PUBLISH', confirmationChannel, serializedConfirmation)
+    this.redisPublisher.publish(confirmationChannel, serializedConfirmation)
 
     contract.confirmed = true
   }

@@ -1,5 +1,11 @@
 const
 MessageBroker                   = require('.'),
+// dispatchers
+AvailibilityResponseDispatcher  = require('./dispatcher/availibility-response'),
+CompletedDispatcher             = require('./dispatcher/completed'),
+ContractDispatcher              = require('./dispatcher/contract'),
+ConfirmationDispatcher          = require('./dispatcher/confirmation'),
+ProgressDispatcher              = require('./dispatcher/progress'),
 // publishers
 AvailibilityRequestPublisher    = require('./publisher/availibility-request'),
 AvailibilityResponsePublisher   = require('./publisher/availibility-response'),
@@ -11,19 +17,22 @@ ProgressTransmitterPublisher    = require('./publisher/progress-transmitter'),
 ProgressPublisher               = require('./publisher/progress'),
 // subscribers
 AvailibilityRequestSubscriber   = require('./subscriber/availibility-request'),
-AvailibilityResponseSubscriber  = require('./subscriber/availibility-response'),
-CompletedSubscriber             = require('./subscriber/completed'),
-ConfirmationSubscriber          = require('./subscriber/confirmation'),
-ContractSubscriber              = require('./subscriber/contract'),
-ProgressSubscriber              = require('./subscriber/progress')
+ContractSubscriber              = require('./subscriber/contract')
 
 class MessageBrokerFactory
 {
-  constructor(messageFactory, events, redisClient)
+  /**
+   * @param {MessageFactory} messageFactory
+   * @param {Events} events
+   * @param {RedisPublisher} redisPublisher
+   * @param {RedisSubscriber} redisSubscriber
+   */
+  constructor(messageFactory, events, redisPublisher, redisSubscriber)
   {
-    this.messageFactory = messageFactory
-    this.events         = events
-    this.redis          = redisClient
+    this.messageFactory   = messageFactory
+    this.events           = events
+    this.redisPublisher   = redisPublisher
+    this.redisSubscriber  = redisSubscriber
   }
 
   /**
@@ -33,24 +42,36 @@ class MessageBrokerFactory
   {
     const
     availibilityRequestSubscriber = this.createAvailibilityRequestSubscriber(),
-    contractSubscriber            = this.createContractSubscriber(),
     progressPublisher             = this.createProgressPublisher(),
-    contractPublisher             = this.createContractPublisher()
+    contractPublisher             = this.createContractPublisher(),
+    contractSubscriber            = this.createContractSubscriber()
 
-    return new MessageBroker(availibilityRequestSubscriber, contractSubscriber,
-       progressPublisher, contractPublisher)
+    return new MessageBroker(availibilityRequestSubscriber, progressPublisher,
+      contractPublisher, contractSubscriber)
   }
 
   /**
-   * @returns {MessageSubscriber}
+   * @returns {ContractDispatcher}
    */
-  createMessageSubscriber()
+  createContractDispatcher()
   {
     const
-    redisClient = this.redis,
-    events      = this.events
+    availibilityRequestPublisher    = this.createAvailibilityRequestPublisher(),
+    availibilityResponseDispatcher  = this.createAvailibilityResponseDispatcher(),
+    progressDispatcher              = this.createProgressDispatcher(),
+    completedDispatcher             = this.createCompletedDispatcher()
 
-    return new MessageSubscriber(redisClient, events)
+    return new ContractDispatcher(this.redisSubscriber, this.messageFactory,
+      this.events, availibilityRequestPublisher, availibilityResponseDispatcher,
+      progressDispatcher, completedDispatcher)
+  }
+
+  /**
+   * @returns {ConfirmationDispatcher}
+   */
+  createConfirmationDispatcher()
+  {
+    return new ConfirmationDispatcher(this.messageFactory)
   }
 
   /**
@@ -58,85 +79,45 @@ class MessageBrokerFactory
    */
   createAvailibilityRequestSubscriber()
   {
-    const
-    redisClient                   = this.redis,
-    messageFactory                = this.messageFactory,
-    events                        = this.events,
-    availibilityResponsePublisher = this.createAvailibilityResponsePublisher()
+    const availibilityResponsePublisher = this.createAvailibilityResponsePublisher()
 
-    return new AvailibilityRequestSubscriber(redisClient, messageFactory,
-      events, availibilityResponsePublisher)
+    return new AvailibilityRequestSubscriber(this.redisSubscriber,
+      this.messageFactory, this.events, availibilityResponsePublisher)
   }
 
   /**
-   * @returns {ContractSubscriber}
+   * @returns {AvailibilityResponseDispatcher}
    */
-  createContractSubscriber()
+  createAvailibilityResponseDispatcher()
   {
     const
-    redisClient                     = this.redis,
-    messageFactory                  = this.messageFactory,
-    events                          = this.events,
-    availibilityRequestPublisher    = this.createAvailibilityRequestPublisher(),
-    availibilityResponseSubscriber  = this.createAvailibilityResponseSubscriber(),
-    progressSubscriber              = this.createProgressSubscriber(),
-    confirmationSubscriber          = this.createConfirmationSubscriber(),
-    completedSubscriber             = this.createCompletedSubscriber()
-
-    return new ContractSubscriber(redisClient, messageFactory, events,
-      availibilityRequestPublisher, availibilityResponseSubscriber,
-      progressSubscriber, confirmationSubscriber, completedSubscriber)
-  }
-
-  /**
-   * @returns {AvailibilityResponseSubscriber}
-   */
-  createAvailibilityResponseSubscriber()
-  {
-    const
-    redisClient           = this.redis,
-    messageFactory        = this.messageFactory,
     executionPublisher    = this.createExecutionPublisher(),
     confirmationPublisher = this.createConfirmationPublisher()
 
-    return new AvailibilityResponseSubscriber(redisClient, messageFactory,
+    return new AvailibilityResponseDispatcher(this.messageFactory,
       executionPublisher, confirmationPublisher)
   }
 
   /**
-   * @returns {ProgressSubscriber}
+   * @returns {ProgressDispatcher}
    */
-  createProgressSubscriber()
+  createProgressDispatcher()
   {
     const
-    redisClient                   = this.redis,
-    messageFactory                = this.messageFactory,
     completedPublisher            = this.createCompletedPublisher(),
     progressTransmitterPublisher  = this.createProgressTransmitterPublisher()
 
-    return new ProgressSubscriber(redisClient, messageFactory,
-      completedPublisher, progressTransmitterPublisher)
+    return new ProgressDispatcher(this.messageFactory, completedPublisher,
+      progressTransmitterPublisher)
   }
 
   /**
-   * @returns {ConfirmationSubscriber}
+   * @returns {CompletedDispatcher}
    */
-  createConfirmationSubscriber()
+  createCompletedDispatcher()
   {
-    return new ConfirmationSubscriber(this.messageFactory)
-  }
-
-  /**
-   * @returns {CompletedSubscriber}
-   */
-  createCompletedSubscriber()
-  {
-    const
-    redisClient     = this.redis,
-    messageFactory  = this.messageFactory,
-    events          = this.events
-
-    return new CompletedSubscriber(redisClient, messageFactory, events)
+    return new CompletedDispatcher(this.redisSubscriber, this.messageFactory,
+      this.events)
   }
 
   /**
@@ -144,11 +125,7 @@ class MessageBrokerFactory
    */
   createExecutionPublisher()
   {
-    const
-    redisClient     = this.redis,
-    messageFactory  = this.messageFactory
-
-    return new ExecutionPublisher(redisClient, messageFactory)
+    return new ExecutionPublisher(this.redisPublisher, this.messageFactory)
   }
 
   /**
@@ -156,7 +133,7 @@ class MessageBrokerFactory
    */
   createProgressTransmitterPublisher()
   {
-    return new ProgressTransmitterPublisher(this.redis)
+    return new ProgressTransmitterPublisher(this.redisPublisher)
   }
 
   /**
@@ -164,11 +141,7 @@ class MessageBrokerFactory
    */
   createCompletedPublisher()
   {
-    const
-    redisClient     = this.redis,
-    messageFactory  = this.messageFactory
-
-    return new CompletedPublisher(redisClient, messageFactory)
+    return new CompletedPublisher(this.redisPublisher, this.messageFactory)
   }
 
   /**
@@ -176,11 +149,7 @@ class MessageBrokerFactory
    */
   createConfirmationPublisher()
   {
-    const
-    redisClient     = this.redis,
-    messageFactory  = this.messageFactory
-
-    return new ConfirmationPublisher(redisClient, messageFactory)
+    return new ConfirmationPublisher(this.redisPublisher, this.messageFactory)
   }
 
   /**
@@ -188,11 +157,8 @@ class MessageBrokerFactory
    */
   createAvailibilityRequestPublisher()
   {
-    const
-    redisClient     = this.redis,
-    messageFactory  = this.messageFactory
-
-    return new AvailibilityRequestPublisher(redisClient, messageFactory)
+    return new AvailibilityRequestPublisher(this.redisPublisher,
+      this.messageFactory)
   }
 
   /**
@@ -200,11 +166,8 @@ class MessageBrokerFactory
    */
   createAvailibilityResponsePublisher()
   {
-    const
-    redisClient     = this.redis,
-    messageFactory  = this.messageFactory
-
-    return new AvailibilityResponsePublisher(redisClient, messageFactory)
+    return new AvailibilityResponsePublisher(this.redisPublisher,
+      this.redisSubscriber, this.messageFactory)
   }
 
   /**
@@ -212,11 +175,7 @@ class MessageBrokerFactory
    */
   createProgressPublisher()
   {
-    const
-    redisClient     = this.redis,
-    messageFactory  = this.messageFactory
-
-    return new ProgressPublisher(redisClient, messageFactory)
+    return new ProgressPublisher(this.redisPublisher, this.messageFactory)
   }
 
   /**
@@ -224,11 +183,17 @@ class MessageBrokerFactory
    */
   createContractPublisher()
   {
-    const
-    redisClient     = this.redis,
-    messageFactory  = this.messageFactory
+    return new ContractPublisher(this.redisPublisher, this.messageFactory)
+  }
 
-    return new ContractPublisher(redisClient, messageFactory)
+  /**
+   * @returns {ContractSubscriber}
+   */
+  createContractSubscriber()
+  {
+    const contractDispatcher = this.createContractDispatcher()
+    return new ContractSubscriber(this.redisSubscriber, contractDispatcher,
+      this.events)
   }
 }
 

@@ -1,32 +1,37 @@
 class ExecutionPublisher
 {
-  constructor(redisClient, messageFactory)
+  /**
+   * @param {RedisPublisher} redisPublisher
+   * @param {MessageFactory} messageFactory
+   */
+  constructor(redisPublisher, messageFactory)
   {
-    this.redis          = redisClient
+    this.redisPublisher = redisPublisher
     this.messageFactory = messageFactory
   }
 
   /**
+   * @param {MessageContract} contract
    */
-  async publish(contract)
+  publish(contract)
   {
-    for(const availibilityResponses of contract.commitments)
-      this.publishExecutionCommitment(contract, availibilityResponses[0])
+    for(const commitment in contract.commitments)
+      this.publishExecutionCommitment(contract, contract.commitments[commitment][0])
   }
 
   /**
    * @protected
    */
-  async publishExecutionCommitment(contract, availibilityResponse)
+  publishExecutionCommitment(contract, availibilityResponse)
   {
     const
-    executionId           = availibilityResponse.executionId,
-    commitment            = availibilityResponse.commitment,
-    channel               = `${contract.id}.execution.${commitment}.${executionId}`,
-    serializedExecution   = this.messageFactory.createExecution(
-      contract.id, contract.input, commitment)
+    executionId         = availibilityResponse.executionId,
+    commitment          = availibilityResponse.commitment,
+    channel             = `${contract.id}.execution.${commitment}.${executionId}`,
+    executionMessage    = this.messageFactory.createExecution(contract.id, contract.input, commitment),
+    serializedExecution = executionMessage.serialize()
 
-    await this.redis.do('PUBLISH', channel, serializedExecution)
+    this.redisPublisher.publish(channel, serializedExecution)
   }
 }
 

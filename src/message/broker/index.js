@@ -1,45 +1,38 @@
 class MessageBroker
 {
   /**
+   * @param {AvailibilityRequestSubscriber} availibilityRequestSubscriber
+   * @param {ProgressPublisher} progressPublisher
+   * @param {ContractPublisher} contractPublisher
+   * @param {ContractSubscriber} contractSubscriber
    */
-  constructor(availibilityRequestSubscriber, contractSubscriber,
-              progressPublisher, contractPublisher)
+  constructor(availibilityRequestSubscriber, progressPublisher,
+    contractPublisher, contractSubscriber)
   {
     this.availibilityRequestSubscriber  = availibilityRequestSubscriber
-    this.contractSubscriber             = contractSubscriber
     this.progressPublisher              = progressPublisher
     this.contractPublisher              = contractPublisher
+    this.contractSubscriber             = contractSubscriber
   }
 
-  /**
-   */
-  publishContract(name, input, commitments)
+  publishContract(...args)
   {
-    return this.contractPublisher.publish(name, input, commitments)
+    return this.contractPublisher.publish(...args)
   }
 
-  /**
-   */
-  publishProgress(contractId, output, commitment, final)
+  publishProgress(...args)
   {
-    return this.progressPublisher.publish(contractId, output, commitment, final)
+    return this.progressPublisher.publish(...args)
   }
 
-  /**
-   */
-  subscribeToAvailibilityRequest(contractName, commitment, dependencies,
-                                 executionObserver, progressObserver)
+  subscribeToAvailibilityRequest(...args)
   {
-    return this.availibilityRequestSubscriber.subscribe(
-      contractName, commitment, dependencies, executionObserver,
-      progressObserver)
+    return this.availibilityRequestSubscriber.subscribe(...args)
   }
 
-  /**
-   */
-  subscribeToContract(contract, originContext)
+  subscribeToContracts(...args)
   {
-    return this.contractSubscriber.subscribe(contract, originContext)
+    this.contractSubscriber.subscribe(...args)
   }
 }
 

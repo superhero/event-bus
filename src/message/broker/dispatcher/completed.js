@@ -1,15 +1,22 @@
-class CompletedSubscriber
+class CompletedDispatcher
 {
-  constructor(redisClient, messageFactory, events)
+  /**
+   * @param {RedisSubscriber} redisSubscriber
+   * @param {MessageFactory} messageFactory
+   * @param {Events} events
+   */
+  constructor(redisSubscriber, messageFactory, events)
   {
-    this.redis          = redisClient
-    this.messageFactory = messageFactory
-    this.events         = events
+    this.redisSubscriber  = redisSubscriber
+    this.messageFactory   = messageFactory
+    this.events           = events
   }
 
   /**
+   * @param {@superhero.Socket.Context} originContext
+   * @param {string} message
    */
-  subscribe(originContext, message)
+  dispatch(originContext, message)
   {
     const completed = this.messageFactory.createCompletedFromSerialized(message)
 
@@ -23,7 +30,7 @@ class CompletedSubscriber
    */
   unsubscribeToContractMessagesInRedis(completed)
   {
-    this.redis.unsubscribe(`${completed.contractId}.*`)
+    this.redisSubscriber.unsubscribe(`${completed.contractId}.*`)
   }
 
   /**
@@ -46,4 +53,4 @@ class CompletedSubscriber
   }
 }
 
-module.exports = CompletedSubscriber
+module.exports = CompletedDispatcher

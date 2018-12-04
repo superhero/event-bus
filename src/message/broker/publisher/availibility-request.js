@@ -1,21 +1,28 @@
 class AvailibilityRequestPublisher
 {
-  constructor(redisClient, messageFactory)
+  /**
+   * @param {RedisPublisher} redisPublisher
+   * @param {MessageFactory} messageFactory
+   */
+  constructor(redisPublisher, messageFactory)
   {
-    this.redis          = redisClient
+    this.redisPublisher = redisPublisher
     this.messageFactory = messageFactory
   }
 
   /**
+   * @param {string} contractName
+   * @param {string} contractId
+   * @param {string} commitment
    */
-  async publish(contractName, contractId, commitment)
+  publish(contractName, contractId, commitment)
   {
     const
     channel = `${contractName}.availibility-request.${commitment}`,
     message = this.messageFactory.createAvailibilityRequest(contractId, commitment),
     serializedAvailibilityRequest = message.serialize()
 
-    await this.redis.do('PUBLISH', channel, serializedAvailibilityRequest)
+    this.redisPublisher.publish(channel, serializedAvailibilityRequest)
   }
 }
 

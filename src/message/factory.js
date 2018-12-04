@@ -131,9 +131,9 @@ class MessageFactory
     const structor = JSON.parse(message)
     return this.createAvailibilityResponse(
       structor.contractId,
+      structor.executionId,
       structor.commitment,
-      structor.requiresInput,
-      structor.dependencyEvents)
+      structor.dependencies)
   }
 
   /**
@@ -145,6 +145,18 @@ class MessageFactory
   {
     this.messageValidator.validateExecution(contractId, input, commitment)
     return new MessageExecution(contractId, input, commitment)
+  }
+
+  /**
+   * @param {string} message serialized availibility response message
+   */
+  createExecutionFromSerialized(message)
+  {
+    const structor = JSON.parse(message)
+    return this.createExecution(
+      structor.contractId,
+      structor.input,
+      structor.commitment)
   }
 
   /**

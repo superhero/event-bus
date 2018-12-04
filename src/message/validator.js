@@ -185,7 +185,7 @@ class MessageValidator
    */
   validateFinal(final)
   {
-    if(typeof final === 'boolean')
+    if(typeof final !== 'boolean')
       throw new MessageFinalTypeError('"final" must be a boolean')
   }
 
@@ -196,10 +196,10 @@ class MessageValidator
    */
   validateDependencies(dependencies)
   {
-    if(!Array.isArray(events))
+    if(!Array.isArray(dependencies))
       throw new MessageDependenciesTypeError('dependencies must be an array')
 
-    events.forEach(this.validateCommitment.bind(this))
+    dependencies.forEach(this.validateCommitment.bind(this))
   }
 
   /**
