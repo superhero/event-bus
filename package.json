@@ -1,6 +1,6 @@
 {
   "name": "event-bus",
-  "description": "Event Bus & Event Sourcing system",
+  "description": "Event bus contract message broker",
   "license": "UNLICENSED",
   "scripts": {
     "generate-doc": "npm test && npm run-script generate-doc-coverage && npm run-script generate-doc-tests && npm run-script generate-doc-jsdoc",
