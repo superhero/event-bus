@@ -1,7 +1,10 @@
 {
-  "name": "event-bus",
+  "name": "@superhero/event-bus",
+  "version": "0.0.1",
   "description": "Event bus contract message broker",
-  "license": "UNLICENSED",
+  "repository": "git@github.com:superhero/js.event-bus.git",
+  "main": "src/index.js",
+  "license": "MIT",
   "scripts": {
     "generate-doc": "npm test && npm run-script generate-doc-coverage && npm run-script generate-doc-tests && npm run-script generate-doc-jsdoc",
     "generate-doc-coverage": "nyc report --reporter=html --report-dir=./doc/coverage",
