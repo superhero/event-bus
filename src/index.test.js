@@ -24,15 +24,14 @@ describe('Event Bus', async () =>
       eventBus.redis.subscriber.redisClient.quit()
       done()
     },
-    originContext       = { emit:(channel)    => channel.endsWith('completed') && completed() },
+    originEmitter       = { emit:(channel)    => channel.endsWith('completed') && completed() },
     executionObserverA  = (messageExecution)  => eventBus.messageBroker.publishProgress(messageExecution.contractId, output, messageExecution.commitment, true),
     executionObserverB  = (messageExecution)  => {},
     progressObserverB   = (messageProgress)   => eventBus.messageBroker.publishProgress(messageProgress.contractId, output, commitmentB, true)
 
-    eventBus.messageBroker.subscribeToContracts(originContext)
     eventBus.messageBroker.subscribeToAvailibilityRequest(contractName, commitmentA, dependencies,  executionObserverA)
     eventBus.messageBroker.subscribeToAvailibilityRequest(contractName, commitmentB, [commitmentA], executionObserverB, progressObserverB)
 
-    eventBus.messageBroker.publishContract(contractName, input, commitments)
+    eventBus.messageBroker.dispatchContract(originEmitter, contractName, input, commitments)
   })
 })

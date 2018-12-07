@@ -13,15 +13,15 @@ class CompletedDispatcher
   }
 
   /**
-   * @param {@superhero.Socket.Context} originContext
+   * @param {Emitter} originEmitter
    * @param {string} message
    */
-  dispatch(originContext, message)
+  dispatch(originEmitter, message)
   {
     const completed = this.messageFactory.createCompletedFromSerialized(message)
 
     this.unsubscribeToContractMessagesInRedis(completed)
-    this.forwardCompletedMessageToOrigin(originContext, completed, message)
+    this.forwardCompletedMessageToOrigin(originEmitter, completed, message)
     this.removeEventListenersByContractId(completed.contractId)
   }
 
@@ -36,9 +36,9 @@ class CompletedDispatcher
   /**
    * @protected
    */
-  forwardCompletedMessageToOrigin(originContext, completed, message)
+  forwardCompletedMessageToOrigin(originEmitter, completed, message)
   {
-    originContext.emit(`${completed.contractId}.completed`, message)
+    originEmitter.emit(`${completed.contractId}.completed`, message)
   }
 
   /**

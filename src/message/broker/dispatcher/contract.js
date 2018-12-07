@@ -23,18 +23,36 @@ class ContractDispatcher
   }
 
   /**
-   * @param {@superhero.Socket.Context} originContext
-   * @param {string} message
+   * @param {Emitter} originEmitter
+   * @param {string} name
+   * @param {*} input
+   * @param {Array<string>} commitments
    */
-  dispatch(originContext, message)
+  dispatch(originEmitter, name, input, commitments)
   {
-    const contract = this.messageFactory.createContractFromSerialized(message)
+    const
+    contractId = this.createContractId(),
+    contract   = this.messageFactory.createContract(contractId, name, input, commitments)
 
     this.subscribeToContractMessages(contract)
     this.attachDispatcherForAvailibilityResponse(contract)
-    this.attachDispatcherForProgress(contract, originContext)
-    this.attachDispatcherForCompleted(contract, originContext)
+    this.attachDispatcherForProgress(contract, originEmitter)
+    this.attachDispatcherForCompleted(contract, originEmitter)
     this.publishAvailibilityRequestForContract(contract)
+  }
+
+  /**
+   * @protected
+   * @returns {string}
+   */
+  createContractId()
+  {
+    const
+    timestamp = Date.now().toString(36),
+    random    = Math.random().toString(36).substr(2),
+    id        = `${timestamp}-${random}`
+
+    return id
   }
 
   /**
@@ -64,12 +82,12 @@ class ContractDispatcher
   /**
    * @protected
    */
-  attachDispatcherForProgress(contract, originContext)
+  attachDispatcherForProgress(contract, originEmitter)
   {
     const
     event       = `${contract.id}.progress`,
     dispatcher  = this.progressDispatcher,
-    listener    = dispatcher.dispatch.bind(dispatcher, originContext, contract)
+    listener    = dispatcher.dispatch.bind(dispatcher, originEmitter, contract)
 
     this.events.on(event, listener)
   }
@@ -77,12 +95,12 @@ class ContractDispatcher
   /**
    * @protected
    */
-  attachDispatcherForCompleted(contract, originContext)
+  attachDispatcherForCompleted(contract, originEmitter)
   {
     const
     event       = `${contract.id}.completed`,
     dispatcher  = this.completedDispatcher,
-    listener    = dispatcher.dispatch.bind(dispatcher, originContext)
+    listener    = dispatcher.dispatch.bind(dispatcher, originEmitter)
 
     this.events.on(event, listener)
   }

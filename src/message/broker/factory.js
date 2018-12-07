@@ -11,13 +11,11 @@ AvailibilityRequestPublisher    = require('./publisher/availibility-request'),
 AvailibilityResponsePublisher   = require('./publisher/availibility-response'),
 CompletedPublisher              = require('./publisher/completed'),
 ConfirmationPublisher           = require('./publisher/confirmation'),
-ContractPublisher               = require('./publisher/contract'),
 ExecutionPublisher              = require('./publisher/execution'),
 ProgressTransmitterPublisher    = require('./publisher/progress-transmitter'),
 ProgressPublisher               = require('./publisher/progress'),
 // subscribers
-AvailibilityRequestSubscriber   = require('./subscriber/availibility-request'),
-ContractSubscriber              = require('./subscriber/contract')
+AvailibilityRequestSubscriber   = require('./subscriber/availibility-request')
 
 class MessageBrokerFactory
 {
@@ -43,11 +41,10 @@ class MessageBrokerFactory
     const
     availibilityRequestSubscriber = this.createAvailibilityRequestSubscriber(),
     progressPublisher             = this.createProgressPublisher(),
-    contractPublisher             = this.createContractPublisher(),
-    contractSubscriber            = this.createContractSubscriber()
+    contractDispatcher            = this.createContractDispatcher()
 
     return new MessageBroker(availibilityRequestSubscriber, progressPublisher,
-      contractPublisher, contractSubscriber)
+      contractDispatcher)
   }
 
   /**
@@ -176,24 +173,6 @@ class MessageBrokerFactory
   createProgressPublisher()
   {
     return new ProgressPublisher(this.redisPublisher, this.messageFactory)
-  }
-
-  /**
-   * @returns {ContractPublisher}
-   */
-  createContractPublisher()
-  {
-    return new ContractPublisher(this.redisPublisher, this.messageFactory)
-  }
-
-  /**
-   * @returns {ContractSubscriber}
-   */
-  createContractSubscriber()
-  {
-    const contractDispatcher = this.createContractDispatcher()
-    return new ContractSubscriber(this.redisSubscriber, contractDispatcher,
-      this.events)
   }
 }
 

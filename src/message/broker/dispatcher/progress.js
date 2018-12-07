@@ -13,13 +13,13 @@ class ProgressDispatcher
   }
 
   /**
-   * @param {@superhero.Socket.Context} originContext
+   * @param {Emitter} originEmitter
    * @param {MessageContract} contract
    * @param {string} message
    */
-  dispatch(originContext, contract, message)
+  dispatch(originEmitter, contract, message)
   {
-    this.forwardProgressMessageToOrigin(originContext, contract, message)
+    this.forwardProgressMessageToOrigin(originEmitter, contract, message)
     const progress = this.messageFactory.createProgressFromSerialized(message)
     // forward progress message to dependent availibility response
     this.progressTransmitterPublisher.publish(contract, progress, message)
@@ -36,9 +36,9 @@ class ProgressDispatcher
   /**
    * @protected
    */
-  forwardProgressMessageToOrigin(originContext, contract, message)
+  forwardProgressMessageToOrigin(originEmitter, contract, message)
   {
-    originContext.emit(`${contract.id}.progress`, message)
+    originEmitter.emit(`${contract.id}.progress`, message)
   }
 
   /**
