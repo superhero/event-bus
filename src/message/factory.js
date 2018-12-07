@@ -1,6 +1,7 @@
 const
 MessageContract             = require('./contract'),
 MessageValidator            = require('./validator'),
+MessageMapper               = require('./mapper'),
 MessageConfirmation         = require('./confirmation'),
 MessageCompleted            = require('./completed'),
 MessageAvailibilityRequest  = require('./availibility-request'),
@@ -13,6 +14,7 @@ class MessageFactory
   constructor()
   {
     this.messageValidator = this.createValidator()
+    this.messageMapper    = this.createMessageMapper()
   }
 
   /**
@@ -21,6 +23,14 @@ class MessageFactory
   createValidator()
   {
     return new MessageValidator
+  }
+
+  /**
+   * @returns {MessageMapper}
+   */
+  createMessageMapper()
+  {
+    return new MessageMapper
   }
 
   /**
@@ -33,6 +43,7 @@ class MessageFactory
    */
   createContract(id, name, input, commitments)
   {
+    commitments = this.messageMapper.mapCommitments(commitments)
     this.messageValidator.validateContract(id, name, input, commitments)
     return new MessageContract(id, name, input, commitments)
   }

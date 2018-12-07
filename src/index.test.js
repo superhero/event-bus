@@ -16,7 +16,7 @@ describe('Event Bus', async () =>
     output              = undefined,
     commitmentA         = 'bar',
     commitmentB         = 'baz',
-    commitments         = { [commitmentA]:[], [commitmentB]:[] },
+    commitments         = [commitmentA, commitmentB],
     dependencies        = [],
     completed           = () =>
     {

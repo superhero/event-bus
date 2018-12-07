@@ -1,6 +1,6 @@
 {
   "name": "@superhero/event-bus",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Event bus contract message broker",
   "repository": "git@github.com:superhero/js.event-bus.git",
   "main": "src/index.js",

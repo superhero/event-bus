@@ -24,10 +24,10 @@ class EventBusFactory
     {
       constructor()
       {
-        eventBus.events         = events
-        eventBus.messageBroker  = messageBroker
-        eventBus.messageFactory = messageFactory
-        eventBus.redis          =
+        this.events         = events
+        this.messageBroker  = messageBroker
+        this.messageFactory = messageFactory
+        this.redis          =
         {
           publisher   : redisPublisher,
           subscriber  : redisSubscriber
