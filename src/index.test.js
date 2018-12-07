@@ -4,7 +4,7 @@ describe('Event Bus', async () =>
   expect  = require('chai').expect,
   context = require('mochawesome/addContext')
 
-  it('is possible to dispacth and complete a contract', (done) =>
+  it('is possible to dispatch and complete a contract', (done) =>
   {
     const
     host                = 'localhost',
