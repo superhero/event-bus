@@ -18,19 +18,22 @@ class EventBusFactory
     redisSubscriber         = redisFactory.createRedisSubscriber(events, host),
     messageFactory          = new MessageFactory(),
     messageBrokerFactory    = new MessageBrokerFactory(messageFactory, events, redisPublisher, redisSubscriber),
-    messageBroker           = messageBrokerFactory.createMessageBroker(),
-    eventBus                = {}
+    messageBroker           = messageBrokerFactory.createMessageBroker()
 
-    eventBus.events         = events
-    eventBus.messageBroker  = messageBroker
-    eventBus.messageFactory = messageFactory
-    eventBus.redis          =
+    return new class EventBus
     {
-      publisher   : redisPublisher,
-      subscriber  : redisSubscriber
+      constructor()
+      {
+        eventBus.events         = events
+        eventBus.messageBroker  = messageBroker
+        eventBus.messageFactory = messageFactory
+        eventBus.redis          =
+        {
+          publisher   : redisPublisher,
+          subscriber  : redisSubscriber
+        }
+      }
     }
-
-    return eventBus
   }
 }
 
