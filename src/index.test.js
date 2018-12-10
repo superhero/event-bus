@@ -24,7 +24,7 @@ describe('Event Bus', async () =>
       eventBus.redis.subscriber.redisClient.quit()
       done()
     },
-    originEmitter       = { emit:(channel)    => channel.endsWith('completed') && completed() },
+    originEmitter       = { emit:(channel)    => channel === 'completed' && completed() },
     executionObserverA  = (messageExecution)  => eventBus.messageBroker.publishProgress(messageExecution.contractId, output, messageExecution.commitment, true),
     executionObserverB  = (messageExecution)  => {},
     progressObserverB   = (messageProgress)   => eventBus.messageBroker.publishProgress(messageProgress.contractId, output, commitmentB, true)

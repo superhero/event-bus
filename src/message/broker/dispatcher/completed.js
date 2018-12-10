@@ -38,7 +38,7 @@ class CompletedDispatcher
    */
   forwardCompletedMessageToOrigin(originEmitter, completed, message)
   {
-    originEmitter.emit(`${completed.contractId}.completed`, message)
+    originEmitter.emit('completed', message)
   }
 
   /**

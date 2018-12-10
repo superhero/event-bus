@@ -10,7 +10,6 @@ ProgressDispatcher              = require('./dispatcher/progress'),
 AvailibilityRequestPublisher    = require('./publisher/availibility-request'),
 AvailibilityResponsePublisher   = require('./publisher/availibility-response'),
 CompletedPublisher              = require('./publisher/completed'),
-ConfirmationPublisher           = require('./publisher/confirmation'),
 ExecutionPublisher              = require('./publisher/execution'),
 ProgressTransmitterPublisher    = require('./publisher/progress-transmitter'),
 ProgressPublisher               = require('./publisher/progress'),
@@ -88,11 +87,11 @@ class MessageBrokerFactory
   createAvailibilityResponseDispatcher()
   {
     const
-    executionPublisher    = this.createExecutionPublisher(),
-    confirmationPublisher = this.createConfirmationPublisher()
+    executionPublisher      = this.createExecutionPublisher(),
+    confirmationDispatcher  = this.createConfirmationDispatcher()
 
     return new AvailibilityResponseDispatcher(this.messageFactory,
-      executionPublisher, confirmationPublisher)
+      executionPublisher, confirmationDispatcher)
   }
 
   /**
@@ -139,14 +138,6 @@ class MessageBrokerFactory
   createCompletedPublisher()
   {
     return new CompletedPublisher(this.redisPublisher, this.messageFactory)
-  }
-
-  /**
-   * @returns {ConfirmationPublisher}
-   */
-  createConfirmationPublisher()
-  {
-    return new ConfirmationPublisher(this.redisPublisher, this.messageFactory)
   }
 
   /**

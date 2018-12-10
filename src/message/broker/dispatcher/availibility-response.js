@@ -3,20 +3,21 @@ class AvailibilityResponseDispatcher
   /**
    * @param {MessageFactory} messageFactory
    * @param {ExecutionPublisher} executionPublisher
-   * @param {ConfirmationPublisher} confirmationPublisher
+   * @param {ConfirmationDispatcher} confirmationDispatcher
    */
-  constructor(messageFactory, executionPublisher, confirmationPublisher)
+  constructor(messageFactory, executionPublisher, confirmationDispatcher)
   {
     this.messageFactory         = messageFactory
     this.executionPublisher     = executionPublisher
-    this.confirmationPublisher  = confirmationPublisher
+    this.confirmationDispatcher = confirmationDispatcher
   }
 
   /**
+   * @param {Emitter} originEmitter
    * @param {MessageContract} contract
    * @param {string} message
    */
-  dispatch(contract, message)
+  dispatch(originEmitter, contract, message)
   {
     // already confirmed? then there's no need to do anything...
     if(this.isContractConfirmed(contract))
@@ -29,7 +30,7 @@ class AvailibilityResponseDispatcher
     if(!this.isContractAvailibleForExecution(contract))
       return
 
-    this.confirmationPublisher.publish(contract)
+    this.confirmationDispatcher.dispatch(originEmitter, contract.id)
     this.executionPublisher.publish(contract)
   }
 

@@ -35,7 +35,7 @@ class ContractDispatcher
     contract   = this.messageFactory.createContract(contractId, name, input, commitments)
 
     this.subscribeToContractMessages(contract)
-    this.attachDispatcherForAvailibilityResponse(contract)
+    this.attachDispatcherForAvailibilityResponse(contract, originEmitter)
     this.attachDispatcherForProgress(contract, originEmitter)
     this.attachDispatcherForCompleted(contract, originEmitter)
     this.publishAvailibilityRequestForContract(contract)
@@ -61,7 +61,6 @@ class ContractDispatcher
   subscribeToContractMessages(contract)
   {
     this.redisSubscriber.subscribe(`${contract.id}.availibility-response`)
-    this.redisSubscriber.subscribe(`${contract.id}.confirmation`)
     this.redisSubscriber.subscribe(`${contract.id}.progress`)
     this.redisSubscriber.subscribe(`${contract.id}.completed`)
   }
@@ -69,12 +68,12 @@ class ContractDispatcher
   /**
    * @protected
    */
-  attachDispatcherForAvailibilityResponse(contract)
+  attachDispatcherForAvailibilityResponse(contract, originEmitter)
   {
     const
     event       = `${contract.id}.availibility-response`,
     dispatcher  = this.availibilityResponseDispatcher,
-    listener    = dispatcher.dispatch.bind(dispatcher, contract)
+    listener    = dispatcher.dispatch.bind(dispatcher, originEmitter, contract)
 
     this.events.on(event, listener)
   }

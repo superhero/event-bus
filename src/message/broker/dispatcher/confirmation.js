@@ -9,13 +9,16 @@ class ConfirmationDispatcher
   }
 
   /**
-   * @param {string} message
-   * @param {@superhero.Socket.Context} originContext
+   * @param {Emitter} originEmitter
+   * @param {string} contractId
    */
-  dispatch(message, originContext)
+  dispatch(originEmitter, contractId)
   {
-    const confirmation = this.messageFactory.createConfirmationFromSerialized(message)
-    originContext.emit(`${completed.contractId}.confirmation`, message)
+    const
+    confirmation            = this.messageFactory.createConfirmation(contractId),
+    serializedConfirmation  = confirmation.serialize()
+
+    originEmitter.emit('confirmation', serializedConfirmation)
   }
 }
 

@@ -38,7 +38,7 @@ class ProgressDispatcher
    */
   forwardProgressMessageToOrigin(originEmitter, contract, message)
   {
-    originEmitter.emit(`${contract.id}.progress`, message)
+    originEmitter.emit('progress', message)
   }
 
   /**
