@@ -11,8 +11,7 @@ class RedisFactory
    */
   createRedisClient(host)
   {
-    const client = redis.createClient({ host })
-    return client
+    return redis.createClient({ host })
   }
 
   /**
