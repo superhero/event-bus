@@ -8,30 +8,37 @@ describe('Event Bus', async () =>
   {
     const
     host                = 'localhost',
+    Debug               = require('@superhero/debug'),
+    console_red         = new Debug({ color:'red'  }),
+    console_blue        = new Debug({ color:'blue' }),
     EventBusFactory     = require('.'),
     eventBusFactory     = new EventBusFactory,
-    eventBus            = eventBusFactory.create(host),
+    eventBus_publisher  = eventBusFactory.create(host, console_red),
+    eventBus_subscriber = eventBusFactory.create(host, console_blue),
     contractName        = 'foobar',
     input               = undefined,
     output              = undefined,
     commitmentA         = 'bar',
     commitmentB         = 'baz',
-    commitments         = [commitmentA, commitmentB],
     dependencies        = [],
     completed           = () =>
     {
-      eventBus.redis.publisher.redisClient.quit()
-      eventBus.redis.subscriber.redisClient.quit()
+      eventBus_publisher.redis.publisher.redisClient.quit()
+      eventBus_publisher.redis.subscriber.redisClient.quit()
+
+      eventBus_subscriber.redis.publisher.redisClient.quit()
+      eventBus_subscriber.redis.subscriber.redisClient.quit()
+
       done()
     },
     originEmitter       = { emit:(channel)    => channel === 'completed' && completed() },
-    executionObserverA  = (messageExecution)  => eventBus.messageBroker.publishProgress(messageExecution.contractId, output, messageExecution.commitment, true),
+    executionObserverA  = (messageExecution)  => eventBus_subscriber.messageBroker.publishProgress(messageExecution.contractId, output, messageExecution.commitment, true),
     executionObserverB  = (messageExecution)  => {},
-    progressObserverB   = (messageProgress)   => eventBus.messageBroker.publishProgress(messageProgress.contractId, output, commitmentB, true)
+    progressObserverB   = (messageProgress)   => eventBus_subscriber.messageBroker.publishProgress(messageProgress.contractId, output, commitmentB, true)
 
-    eventBus.messageBroker.subscribeToAvailibilityRequest(contractName, commitmentA, dependencies,  executionObserverA)
-    eventBus.messageBroker.subscribeToAvailibilityRequest(contractName, commitmentB, [commitmentA], executionObserverB, progressObserverB)
+    eventBus_subscriber.messageBroker.subscribeToAvailibilityRequest(contractName, commitmentA, dependencies,  executionObserverA)
+    eventBus_subscriber.messageBroker.subscribeToAvailibilityRequest(contractName, commitmentB, [commitmentA], executionObserverB, progressObserverB)
 
-    eventBus.messageBroker.dispatchContract(originEmitter, contractName, input, commitments)
+    eventBus_publisher.messageBroker.dispatchContract(originEmitter, contractName, input, [commitmentA, commitmentB])
   })
 })

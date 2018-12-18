@@ -16,13 +16,14 @@ class RedisFactory
 
   /**
    * @param {string} host redis
+   * @param {console} console
    * @returns {RedisPublisher}
    */
-  createRedisPublisher(host)
+  createRedisPublisher(host, console)
   {
     const
     redisClient     = this.createRedisClient(host),
-    redisPublisher  = new RedisPublisher(redisClient)
+    redisPublisher  = new RedisPublisher(redisClient, console)
 
     return redisPublisher
   }
@@ -30,13 +31,14 @@ class RedisFactory
   /**
    * @param {Events} events
    * @param {string} host redis
+   * @param {console} console
    * @returns {RedisSubscriber}
    */
-  createRedisSubscriber(events, host)
+  createRedisSubscriber(events, host, console)
   {
     const
     redisClient     = this.createRedisClient(host),
-    redisSubscriber = new RedisSubscriber(redisClient)
+    redisSubscriber = new RedisSubscriber(redisClient, console)
 
     redisClient.on('message', (...args) =>
     {

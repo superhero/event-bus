@@ -30,6 +30,8 @@ class AvailibilityResponseDispatcher
     if(!this.isContractAvailibleForExecution(contract))
       return
 
+    this.setContractAsConfirmed(contract)
+
     this.confirmationDispatcher.dispatch(originEmitter, contract.id)
     this.executionPublisher.publish(contract)
   }
@@ -40,6 +42,14 @@ class AvailibilityResponseDispatcher
   isContractConfirmed(contract)
   {
     return !! contract.confirmed
+  }
+
+  /**
+   * @protected
+   */
+  setContractAsConfirmed(contract)
+  {
+    contract.confirmed = true
   }
 
   /**

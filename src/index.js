@@ -1,4 +1,5 @@
 const
+Debug                 = require('@superhero/debug'),
 Events                = require('events'),
 MessageFactory        = require('./message/factory'),
 MessageBrokerFactory  = require('./message/broker/factory'),
@@ -8,14 +9,17 @@ class EventBusFactory
 {
   /**
    * @param {string} host redis host
+   * @param {console} console
    */
-  create(host)
+  create(host, console)
   {
+    console = console || new Debug()
+
     const
     events                  = new Events(),
     redisFactory            = new RedisFactory(),
-    redisPublisher          = redisFactory.createRedisPublisher(host),
-    redisSubscriber         = redisFactory.createRedisSubscriber(events, host),
+    redisPublisher          = redisFactory.createRedisPublisher(host, console),
+    redisSubscriber         = redisFactory.createRedisSubscriber(events, host, console),
     messageFactory          = new MessageFactory(),
     messageBrokerFactory    = new MessageBrokerFactory(messageFactory, events, redisPublisher, redisSubscriber),
     messageBroker           = messageBrokerFactory.createMessageBroker()
